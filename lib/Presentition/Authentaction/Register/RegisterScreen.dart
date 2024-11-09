@@ -1,183 +1,281 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:taskmanagmentgit/Core/utills/AssetsManager.dart';
-import 'package:taskmanagmentgit/Core/utills/RoutesManager.dart';
-import '../../../Core/Reusable_Components/CustomTextFiield.dart';
-import '../Login/LoginScreen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../../Core/Dialog/Dialogs.dart';
+import '../../../Core/utills/AppStyles.dart';
+import '../../../Core/utills/AssetsManager.dart';
+import '../../../Core/utills/ConstantsManager.dart';
+import '../../../Core/utills/Email_Validation.dart';
+import '../../../Core/utills/RoutesManager.dart';
+import '../../../Core/utills/StringsManager.dart';
+import '../../../database_manager/User_DM.dart';
+import '../Widgets/Custom_Text_Field.dart';
 
-class RegisterScreen extends StatelessWidget {
-  final TextEditingController fullNameController = TextEditingController();
-  final TextEditingController userNameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController rePasswordController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+class Register extends StatefulWidget {
+  const Register({super.key});
+
+  @override
+  State<Register> createState() => _RegisterState();
+}
+
+class _RegisterState extends State<Register> {
+  late TextEditingController fullNameController;
+
+  late TextEditingController userNameController;
+
+  late TextEditingController emailController;
+
+  late TextEditingController passwordController;
+
+  late TextEditingController rePasswordController;
+
+  GlobalKey<FormState> formKey = GlobalKey();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fullNameController = TextEditingController();
+    userNameController = TextEditingController();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    rePasswordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    fullNameController.dispose();
+    userNameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    rePasswordController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue.shade900,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(AssetsManager.todoLogo),
+        child: SingleChildScrollView(
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SvgPicture.asset(
+                  AssetsManager.route,
+                  width: 237.w,
+                  height: 71.h,
+                ),
+                Text(
+                  'Full name',
+                  style: LightAppStyle.title,
+                ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter full name';
+                    }
+                    return null;
+                  },
+                  controller: fullNameController,
+                  hintText: ConstantManager.fullName,
+                  keyboardType: TextInputType.name,
+                ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                Text(
+                  'user name',
+                  style: LightAppStyle.title,
+                ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter user name';
+                    }
+                    return null;
+                  },
+                  controller: userNameController,
+                  hintText: ConstantManager.userName,
+                  keyboardType: TextInputType.name,
+                ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                Text(
+                  'Email address',
+                  style: LightAppStyle.title,
+                ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter emil';
+                    }
+                    if (!isValidEmail(input)) {
+                      // email is not Valid
+                      return 'Email bad format';
+                    }
+                    return null;
+                  },
+                  controller: emailController,
+                  hintText: ConstantManager.email,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                Text(
+                  'Password',
+                  style: LightAppStyle.title,
+                ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter password';
+                    }
+                    return null;
+                  },
+                  controller: passwordController,
+                  hintText: ConstantManager.password,
+                  keyboardType: TextInputType.visiblePassword,
+                  isSecureText: true,
+                ), // password
+                SizedBox(
+                  height: 12.h,
+                ),
+                Text(
+                  'Re-password',
+                  style: LightAppStyle.title,
+                ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter re-password';
+                    }
+                    if (input != passwordController.text) {
+                      return "Password doesn't match";
+                    }
+                    return null;
+                  },
+                  controller: rePasswordController,
+                  hintText: ConstantManager.passwordConfirmation,
+                  keyboardType: TextInputType.visiblePassword,
+                  isSecureText: true,
+                ),
+                SizedBox(
+                  height: 12.h,
+                ),
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.r)),
+                        padding: REdgeInsets.symmetric(vertical: 11)),
+                    onPressed: () {
+                      register();
+                    },
+                    child: Text(
+                      'Sign-Up',
+                      style: LightAppStyle.buttonText,
+                    ))
+              ],
             ),
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  BuildTitle("Full Name"),
-                  BuildFullNameTextField(),
-                  BuildTitle("User Name"),
-                  BuildUserNameTextField(),
-                  BuildTitle("E-mail"),
-                  BuildEmailTextField(),
-                  BuildTitle("Password"),
-                  BuildPasswordTextField(),
-                  BuildTitle("Re-Password"),
-                  BuildRePasswordTextField(),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 15,
-                    ),
-                  ),
-                  RegisterButton(),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 15,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Row(
-                      children: [
-                        const Text(
-                          "Already Have An Account ?",
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white,
-                              fontWeight: FontWeight.normal),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(
-                                context, RoutesManager.LoginScreenroute);
-                          },
-                          child: const Text(
-                            "Sign-In",
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal , decoration: TextDecoration.underline),
-                          ),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget BuildTitle(String Title) => SliverToBoxAdapter(
-        child: Text(
-          Title,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.white,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
+  void register() async {
+    if (formKey.currentState?.validate() == false) return;
+
+    try {
+      // show Loading
+      MyDialog.showLoading(context,
+          loadingMessage: 'Waiting...', isDismissible: false);
+      final credential =
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
       );
 
-  Widget BuildFullNameTextField() => SliverToBoxAdapter(
-        child: Customtextformfeild(
-          hintText: "Enter your full name",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return "Please enter full name";
-            }
-          },
-          controller: fullNameController,
-        ),
-      );
+      addUserToFireStore(credential.user!.uid);
+      //hide loading
+      if (mounted) {
+        MyDialog.hide(context);
+      }
+      // show success message
+      if (mounted) {
+        MyDialog.showMessage(context,
+            body: 'User registered successfully',
+            posActionTitle: 'Ok', posAction: () {
+              Navigator.pushReplacementNamed(context, RoutesManager.login);
+            });
+      }
+    } on FirebaseAuthException catch (authError) {
+      if (mounted) {
+        MyDialog.hide(context);
+      }
+      late String message;
+      if (authError.code == ConstantManager.weakPassword) {
+        message = StringsManager.weakPasswordMessage;
+      } else if (authError.code == ConstantManager.emailInUse) {
+        message = StringsManager.emailInUseMessage;
+      }
+      if (mounted) {
+        MyDialog.showMessage(
+          context,
+          title: 'Error',
+          body: message,
+          posActionTitle: 'OK',
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        MyDialog.hide(context);
+        MyDialog.showMessage(context,
+            title: 'Error',
+            body: error.toString(),
+            posActionTitle: 'Try again');
+      }
+    }
+  }
 
-  Widget BuildUserNameTextField() => SliverToBoxAdapter(
-        child: Customtextformfeild(
-          hintText: "Enter your user name",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return "Please enter user name";
-            }
-          },
-          controller: userNameController,
-        ),
-      );
-
-  Widget BuildEmailTextField() => SliverToBoxAdapter(
-        child: Customtextformfeild(
-          hintText: "Enter your E-mail",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return "Please enter E-mail address";
-            }
-          },
-          controller: emailController,
-        ),
-      );
-
-  Widget BuildPasswordTextField() => SliverToBoxAdapter(
-        child: Customtextformfeild(
-          hintText: "Enter your Password",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return "Please enter Password";
-            }
-            if (input.length < 6) {
-              return "Sorry, password should be at least 6 characters";
-            }
-          },
-          isSecure: true,
-          controller: passwordController,
-        ),
-      );
-
-  Widget BuildRePasswordTextField() => SliverToBoxAdapter(
-        child: Customtextformfeild(
-          hintText: "Confirm Password",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return "Please enter Password";
-            }
-            if (input != passwordController.text) {
-              return "Sorry, the two passwords are different";
-            }
-          },
-          isSecure: true,
-          controller: rePasswordController,
-        ),
-      );
-
-  Widget RegisterButton() => SliverToBoxAdapter(
-        child: MaterialButton(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          onPressed: () {},
-          child: const Text(
-            "Sign-Up",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF004182),
-            ),
-          ),
-        ),
-      );
+  void addUserToFireStore(String uid) async {
+    UserDM userDM = UserDM(
+      id: uid,
+      fullName: fullNameController.text,
+      userName: userNameController.text,
+      email: emailController.text,
+    );
+    CollectionReference usersCollection =
+    FirebaseFirestore.instance.collection(UserDM.collectionName);
+    DocumentReference userDocument = usersCollection.doc(uid);
+    await userDocument.set(userDM.toFireStore());
+  }
 }

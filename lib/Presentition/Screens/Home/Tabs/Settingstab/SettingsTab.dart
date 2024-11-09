@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:taskmanagmentgit/Core/utills/AppStyles.dart';
-import 'package:taskmanagmentgit/Core/utills/ColorsManager.dart';
+
+
+import '../../../../../Core/utills/AppStyles.dart';
+import '../../../../../Core/utills/ColorsManager.dart';
+
+typedef OnChanged = void Function(String?);
 
 class SettingsTab extends StatefulWidget {
   SettingsTab({super.key});
@@ -10,110 +14,87 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
-  String? SelectedTheme = 'Light';
-
-  String? SelectedLanguage = 'English';
+  String selectedTheme = 'Light';
+  String selectedLang = 'English';
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text("Theme",
-              style: CommonAppStyles.SettingItemTextStyle
+          Text(
+            'Theme',
+            style: LightAppStyle.settingsTabLabel,
           ),
-          const SizedBox(
-            height: 8,
+          SizedBox(
+            height: 4,
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            width: double.infinity,
-            height: 48,
-            decoration: BoxDecoration(
-            color: Colors.white,
-             // color: colorsManager.blackAccent,
-              border: Border.all(
-                color: Theme.of(context).dividerColor,
-                width: 2,
-              ),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  SelectedTheme!,
-                  style: CommonAppStyles.ItemView,
-                ),
-                const Spacer(),
-                DropdownButton<String>(
-                  elevation: 0,
-                  items: <String>['Light', 'Dark '].map((String value) {
-                    SelectedTheme = value;
-                    return DropdownMenuItem<String>(
-                      value: SelectedTheme,
-                      child: Text(SelectedTheme! ,
-                        //  style: lightAppStyles.lightdropDownItems,
-                        style: darkAppStyles.darkdropDownItems ,
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (NewTheme) {
-                    SelectedTheme = NewTheme;
-                    setState(() {});
-                  },
-                )
-              ],
-            ),
+          buildSettingsTabComponent(
+            'Light',
+            'Dark',
+            selectedTheme,
+                (newTheme) {
+              selectedTheme = newTheme ?? selectedTheme;
+              setState(() {});
+            },
           ),
-          const SizedBox(
-            height: 14,
+          SizedBox(
+            height: 12,
           ),
-          Text("Language",  style: CommonAppStyles.SettingItemTextStyle),
-          const SizedBox(
-            height: 8,
+          Text(
+            'Language',
+            style: LightAppStyle.settingsTabLabel,
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            width: double.infinity,
-            height: 48,
-            decoration: BoxDecoration(
-                  /*light*/     color: Colors.white,
-        //   color: colorsManager.blackAccent,
-              border: Border.all(
-                color: Theme.of(context).dividerColor,
-                width: 2,
-              ),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  SelectedLanguage!,
-              style: CommonAppStyles.ItemView,
-                ),
-              const Spacer(),
-                DropdownButton<String>(
-                  elevation: 0,
-                  items: <String>['English', 'Arabic '].map((String value) {
-                    SelectedLanguage = value;
-                    return DropdownMenuItem<String>(
-                      value: SelectedLanguage,
-                      child: Text(SelectedLanguage! ,
-                          style: lightAppStyles.lightdropDownItems,
-                        //style: darkAppStyles.darkdropDownItems ,
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (NewTheme) {
-                    SelectedLanguage = NewTheme;
-                    setState(() {});
-                  },
-                )
-              ],
-            ),
+          SizedBox(
+            height: 4,
+          ),
+          buildSettingsTabComponent(
+            'English',
+            'Arabic',
+            selectedLang,
+                (newLang) {
+              selectedLang = newLang ?? selectedLang;
+              setState(() {});
+            },
           ),
         ],
       ),
     );
   }
+
+  Widget buildSettingsTabComponent(
+      String item1, String item2, String textView, OnChanged onChanged) {
+    return Container(
+        height: 48,
+        padding: EdgeInsets.all(6),
+        decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onPrimary,
+            border: Border.all(width: 1, color: ColorsManager.blue)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(textView, style: LightAppStyle.selectedItemLabel),
+            DropdownButton<String>(
+              underline: SizedBox(),
+              borderRadius: BorderRadius.circular(12),
+              items: <String>[item1, item2].map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: onChanged,
+            ),
+          ],
+        ));
+  }
+}
+
+class MenuItem {
+  String item1;
+  String item2;
+
+  MenuItem({required this.item1, required this.item2});
 }

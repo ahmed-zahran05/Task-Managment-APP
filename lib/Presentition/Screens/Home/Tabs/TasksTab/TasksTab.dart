@@ -1,107 +1,141 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
-import 'package:taskmanagmentgit/Core/Reusable_components/Task_Item.dart';
-import 'package:taskmanagmentgit/Core/utills/ColorsManager.dart';
-import 'package:taskmanagmentgit/Core/utills/Date.dart';
-import 'package:taskmanagmentgit/database_manager/todo-DM.dart';
-
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:taskmanagmentgit/Core/Data/date_ex.dart';
+import '../../../../../Core/Reusable_Components/Task_Item.dart';
+import '../../../../../Core/utills/AppStyles.dart';
+import '../../../../../Core/utills/ColorsManager.dart';
+import '../../../../../database_manager/User_DM.dart';
+import '../../../../../database_manager/todo-DM.dart';
 
 class TasksTab extends StatefulWidget {
-   TasksTab({super.key});
+  const TasksTab({super.key});
 
   @override
-  State<TasksTab> createState() => _TasksTabState();
+  State<TasksTab> createState() => TasksTabState();
 }
 
-class _TasksTabState extends State<TasksTab> {
-   DateTime selecteDate = DateTime.now();
+class TasksTabState extends State<TasksTab> {
+  DateTime calenderSelectedDate = DateTime.now(); //
+  List<TodoDM> todosList = [];
 
-   List<TodoDm> todosList =[];
+  /// empty state
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getTodosFromFireStore(); //
+  }
 
   @override
   Widget build(BuildContext context) {
-    readTodosFromFireStore();
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          flex: 30,
-          child: Stack(
-            children: [
-              Container(
-                height: 200,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        color: colorsManager.bluecolor,
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        color: colorsManager.lightScaffoldBgColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              EasyInfiniteDateTimeLine(
-                firstDate: DateTime.now().subtract( Duration(days: 365) ),
-                focusDate: DateTime.now(),
-                lastDate: DateTime.now().add( Duration(days: 365) ),
-                onDateChange: (selectedDate) {
-                },
-                itemBuilder: (context, date, isSelected, onTap) {
-                  return buildCalenderItem(date , isSelected);
-                },
-              ),
-            ],
-          ),
+        Stack(
+          children: [
+            Container(
+              color: ColorsManager.blue,
+              height: 90.h,
+            ),
+            buildCalender(),
+          ],
         ),
-
         Expanded(
-          flex: 70,
-          child: ListView.builder(
-            itemBuilder:  (context, index) => TaskItem(todoo: todosList[index],),
-            itemCount: todosList.length,  ),
-        )
-
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                print(todosList.length);
+                return TodoItem(
+                  todo: todosList[index],
+                  onDeletedTask: () {
+                    getTodosFromFireStore();
+                  },
+                );
+              },
+              itemCount: todosList.length,
+            ))
       ],
     );
   }
 
-  readTodosFromFireStore()async{
-    CollectionReference todoCollection = FirebaseFirestore.instance.collection(TodoDm.collectionName);
-    QuerySnapshot querySnapshot = await todoCollection.get();
-    List<QueryDocumentSnapshot> docs = querySnapshot.docs;
-    
-    todosList = docs.map((docSnapShot) {
-      Map<String,dynamic> json = docSnapShot.data() as Map<String,dynamic>;
-      TodoDm todo = TodoDm.fromJson(json);
-      return todo ;
-    },).toList();
-    setState(() {
-      
-    });
-    
+  Widget buildCalender() {
+    "SELECT * FROM Customer";
+    return EasyInfiniteDateTimeLine(
+      firstDate: DateTime.now().subtract(Duration(days: 365)),
+      focusDate: calenderSelectedDate,
+      lastDate: DateTime.now().add(Duration(days: 365)),
+      onDateChange: (selectedDate) {},
+      itemBuilder: (context, date, isSelected, onTap) {
+        return InkWell(
+          onTap: () {
+            calenderSelectedDate = date; // 2/11
+            getTodosFromFireStore();
+          },
+          child: Card(
+            elevation: 8,
+            color: ColorsManager.white,
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  date.getDayName,
+                  style: isSelected
+                      ? LightAppStyle.calenderSelectedDate
+                      : LightAppStyle.calenderUnSelectedDate,
+                ),
+                Text(
+                  '${date.day}',
+                  style: isSelected
+                      ? LightAppStyle.calenderSelectedDate
+                      : LightAppStyle.calenderUnSelectedDate,
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
- Widget buildCalenderItem(DateTime date , bool isSelected ){
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color: Colors.white,
-      ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-           children: [
-             Text(date.getDay , style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: isSelected? colorsManager.bluecolor : colorsManager.black ),),
-             SizedBox(height: 4,),
-             Text("${date.day}" ,  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: isSelected? colorsManager.bluecolor : colorsManager.black )  ),
-           ],
-        ),
-    );
+  void getTodosFromFireStore() async {
+    // todo
+
+    CollectionReference todoCollection = FirebaseFirestore.instance
+        .collection(UserDM.collectionName)
+        .doc(UserDM.currentUser!.id)
+        .collection(TodoDM.collectionName);
+
+    QuerySnapshot collectionSnapShot = await todoCollection
+        .where('dateTime',
+        isEqualTo: calenderSelectedDate.copyWith(
+          hour: 0,
+          microsecond: 0,
+          minute: 0,
+          millisecond: 0,
+          second: 0,
+        ))
+        .get();
+    List<QueryDocumentSnapshot> documentsSnapShot = collectionSnapShot.docs;
+    // get All todos
+    todosList = documentsSnapShot.map(
+          (docSnapShot) {
+        Map<String, dynamic> json = docSnapShot.data() as Map<String, dynamic>;
+        TodoDM todo = TodoDM.fromFireStore(json);
+        return todo;
+      },
+    ).toList();
+    // filter todos based selectedCalenderDate
+    // todosList = todosList
+    //     .where(
+    //       (todo) =>
+    //           todo.dateTime.day == calenderSelectedDate.day &&
+    //           todo.dateTime.month == calenderSelectedDate.month &&
+    //           todo.dateTime.year == calenderSelectedDate.year,
+    //     )
+    //     .toList();
+    setState(() {});
   }
 }

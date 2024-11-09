@@ -1,100 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:taskmanagmentgit/Core/utills/AppStyles.dart';
+import 'package:taskmanagmentgit/Core/utills/ColorsManager.dart';
 
-import '../../Core/utills/AppStyles.dart';
-import '../../Core/utills/ColorsManager.dart';
 
-class myTheme {
+class AppTheme {
   static ThemeData light = ThemeData(
-    useMaterial3: false,
-    primaryColor: colorsManager.bluecolor,
-    appBarTheme: AppBarTheme(
-      backgroundColor: colorsManager.bluecolor,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: lightAppStyles.lightAppBarTextStyle,
-    ),
-    scaffoldBackgroundColor: colorsManager.lightScaffoldBgColor,
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.transparent,
-      selectedItemColor: colorsManager.bluecolor,
-      unselectedItemColor: colorsManager.greycolor,
-      elevation: 0,
-      selectedIconTheme: IconThemeData(
-        size: 32,
+      colorScheme: ColorScheme.fromSeed(
+          seedColor: ColorsManager.blue,
+          primary: ColorsManager.blue,
+          onPrimary: ColorsManager.white),
+      useMaterial3: false,
+      appBarTheme: AppBarTheme(
+          elevation: 0,
+          backgroundColor: ColorsManager.blue,
+          titleTextStyle: LightAppStyle.appBar),
+      scaffoldBackgroundColor: ColorsManager.greenAccent,
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        selectedItemColor: ColorsManager.blue,
+        unselectedItemColor: ColorsManager.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: false,
+        selectedIconTheme: IconThemeData(size: 33),
+        unselectedIconTheme: IconThemeData(size: 33),
       ),
-    ),
-    floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      shape: StadiumBorder(side: BorderSide(color: Colors.white, width: 4)),
-      backgroundColor: colorsManager.bluecolor,
-      elevation: 5,
-      iconSize: 20,
-    ),
-    bottomAppBarTheme: const BottomAppBarTheme(
-      color: colorsManager.Whitecolor,
-      elevation: 16,
-      shape: CircularNotchedRectangle(),
-    ),
-    dividerColor: colorsManager.bluecolor,
-    cardTheme: CardTheme(
+      bottomAppBarTheme: const BottomAppBarTheme(
+        shape: CircularNotchedRectangle(),
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        shape: StadiumBorder(
+            side: BorderSide(color: ColorsManager.white, width: 4)),
+        backgroundColor: ColorsManager.blue,
+        iconSize: 26,
+        foregroundColor: ColorsManager.white,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: ColorsManager.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        color: Colors.transparent,
-        elevation: 0),
-    bottomSheetTheme: const BottomSheetThemeData(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(12),
-          topLeft: Radius.circular(12),
-        ),
-      ),
-    ),
-  );
-  static ThemeData dark = ThemeData(
-    useMaterial3: false,
-    primaryColor: colorsManager.bluecolor,
-    appBarTheme: AppBarTheme(
-      backgroundColor: colorsManager.bluecolor,
-      elevation: 3,
-      centerTitle: true,
-      titleTextStyle: lightAppStyles.lightAppBarTextStyle,
-    ),
-    scaffoldBackgroundColor: colorsManager.black,
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.transparent,
-      selectedItemColor: colorsManager.bluecolor,
-      unselectedItemColor: colorsManager.greycolor,
-      elevation: 0,
-      selectedIconTheme: IconThemeData(
-        size: 32,
-      ),
-    ),
-    floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      shape: StadiumBorder(side: BorderSide(color: Colors.white, width: 4)),
-      backgroundColor: colorsManager.blackAccent,
-      elevation: 12,
-      iconSize: 20,
-    ),
-    bottomAppBarTheme: const BottomAppBarTheme(
-      color: colorsManager.blackAccent,
-      elevation: 16,
-      shape: CircularNotchedRectangle(),
-    ),
-    dividerColor: colorsManager.bluecolor,
-    cardTheme: CardTheme(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        color: colorsManager.blackAccent,
-        elevation: 20),
-    bottomSheetTheme: const BottomSheetThemeData(
-      backgroundColor:   colorsManager.blackAccent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(12),
-          topLeft: Radius.circular(12),
-        ),
-      ),
-    ),
-  );
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            )),
+      ));
+  static ThemeData dark = ThemeData();
 }

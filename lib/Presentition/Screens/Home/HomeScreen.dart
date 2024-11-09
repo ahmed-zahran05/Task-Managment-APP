@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:taskmanagmentgit/Presentition/Screens/Home/AddTaskBottomSheet/AddTaskBottomSheet.dart';
+
+import 'AddTaskBottomSheet/AddTaskBottomSheet.dart';
 import 'Tabs/Settingstab/SettingsTab.dart';
 import 'Tabs/TasksTab/TasksTab.dart';
 
@@ -12,52 +13,63 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int SelectedIndex = 0;
-  String AppTitleText  = 'To Do List' ;
-  List<Widget> tabs = [
-    TasksTab(),
-    SettingsTab(),
-  ];
+  GlobalKey<TasksTabState> tasksTabKey = GlobalKey();
+  int currentIndex = 0;
+  List<Widget> tabs = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    tabs = [
+      TasksTab(
+        key: tasksTabKey,
+      ),
+      SettingsTab(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
       appBar: AppBar(
-        title:  Text(AppTitleText),
+        title: const Text('ToDo List'),
       ),
-      floatingActionButton: BuildFab(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BuildBottomNavBar(),
-      body: tabs[SelectedIndex],
+      floatingActionButton: buildFab(),
+      bottomNavigationBar: buildBottomNavBar(),
+      body: tabs[currentIndex],
     );
   }
 
- Widget BuildFab()=> FloatingActionButton(
-   onPressed: () {
-    AddTaskBottomSheet.Show(context);
-   },
-   child: const Icon(Icons.add),
- );
- Widget BuildBottomNavBar()=> BottomAppBar(
-   notchMargin: 8,
-   child: BottomNavigationBar(
-     onTap: (index) {
-       if(index == 0 ){
-         AppTitleText = 'To Do List';
-       }
-       else{
-         AppTitleText = "Settings" ;
-       }
-       SelectedIndex = index;
-       setState(() {});
-     },
-     currentIndex: SelectedIndex,
-     items: const [
-       BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Tasks'),
-       BottomNavigationBarItem(
-           icon: Icon(Icons.settings), label: 'Settings'),
-     ],
-   ),
- );
+  Widget buildBottomNavBar() => ClipRRect(
+    clipBehavior: Clip.antiAlias,
+    borderRadius: const BorderRadius.only(
+      topLeft: Radius.circular(15),
+      topRight: Radius.circular(15),
+    ),
+    child: BottomAppBar(
+      notchMargin: 8,
+      child: BottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: (tappedIndex) {
+            currentIndex = tappedIndex;
+            setState(() {});
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Tasks'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.settings_outlined), label: 'Settings'),
+          ]),
+    ),
+  );
+
+  Widget buildFab() => FloatingActionButton(
+    onPressed: () async {
+      await AddTaskBottomSheet.show(context); // 2
+      // access reading data from firestore
+      tasksTabKey.currentState?.getTodosFromFireStore();
+    },
+    child: Icon(Icons.add),
+  );
 }
